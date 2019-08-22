@@ -97,10 +97,10 @@ def setpoint(hi, lo):
 
 def update():
     for d in status.devices:
-        if d.temperature < status.set_point_low:
+        if d.temperature < status.set_point_low and d.heater is True:
             d.heater = True
             emit('heater', d.heater, room=d.sid)
-        elif d.temperature > status.set_point_high:
+        elif d.temperature > status.set_point_high and d.heater is False:
             d.heater = False
             emit('heater', d.heater, room=d.sid)
     if status.master is not None:
