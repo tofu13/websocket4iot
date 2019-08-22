@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+Room <input id="name">
+<button id="connect_button">Connect</button>
+<button id="button">Disconnect</button>
+<br>
+<span id="status">Disconnected</span><br>
+Heater: <span id="heater"></span><br>
+<span id="temperature"></span> °C<br>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
+<script type="text/javascript" charset="utf-8">
+    socket = io({'autoConnect':false});
+    socket.on('connect', function() {
+        document.getElementById('status').innerText='Connected';
+        document.getElementById('status').style.color='Green';
+        socket.emit('name', document.getElementById('name').value);
+    });
+    socket.on('heater', function(msg) {
+        heater = msg;
+        document.getElementById('heater').innerText = msg?'On':'Off';
+        document.getElementById('heater').style.color = msg?'Red':'Black';
+    });
+
+
+    document.getElementById('connect_button').onclick=function() {
+        socket.open();
+        document.getElementById('status').innerText='Connected';
+    };
+    document.getElementById('button').onclick=function() {
+        socket.close();
+        document.getElementById('status').innerText='Disconnected';
+        document.getElementById('status').style.color='Black';
+    };
+
+    temperature = 20.0;
+    heater = false;
+    setInterval(function() {
+        temperature *= .99;
+        if (heater) temperature += (30-temperature) * .05;
+        temperature = Math.round(100*temperature)/100;
+        document.getElementById('temperature').innerText=temperature.toFixed(2);
+        if (socket.connected) socket.emit('temperature', temperature);
+    }, 200);
+</script>
+</body>
+</html>

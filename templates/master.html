@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Control panel</title>
+</head>
+<body>
+<h1>Control Panel</h1>
+<hr>
+Setpoint <input id="setpoint_low" type='number' min="0" max="40" style="width: 4em" value="18">°C Lo - <input id="setpoint_high" type='number' min="0" max="40" style="width: 4em" value="20">°C Hi<br/>
+Devices: <span id="devices"></span><br/>
+<br/>
+<textarea id="status" cols="100" rows="10"></textarea>
+<script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
+<script type="text/javascript" charset="utf-8">
+    socket = io();
+    socket.on('connect', function() {
+        socket.emit('register_master','fvc^0943!');
+    });
+
+    socket.on('status', function(data) {
+        var data = JSON.parse(data);
+        var status = ''
+        for(d of data) {
+            status += `${d.name} ${d.temperature.toFixed(2)} °C heater:${d.heater?'On':'Off'}\n`;
+        }
+        document.getElementById('status').value = status;
+        document.getElementById('devices').innerText = data.length;
+    });
+
+    function setpoint() {
+        var hi = document.getElementById('setpoint_high').value;
+        var lo = document.getElementById('setpoint_low').value;
+        socket.emit('setpoint', hi, lo);
+    }
+
+    document.getElementById('setpoint_high').addEventListener('change', setpoint)
+    document.getElementById('setpoint_low').addEventListener('change', setpoint)
+
+</script>
+</body>
+</html>
