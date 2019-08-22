@@ -42,6 +42,8 @@ class Status:
     def remove_device(self, sid):
         if status[sid]:
             self.devices.remove(status[sid])
+        elif status.master == sid:
+            status.master = None
 
     def getJSON(self):
         return dumps([d.toJSON() for d in self.devices])
